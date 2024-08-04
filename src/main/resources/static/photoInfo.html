@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Photo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        box-sizing: border-box;
+      }
+      h1 {
+        text-align: center;
+        margin: 20px 0;
+      }
+      #photoInfo {
+        padding: 0 0;
+        border: 3px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #f9f9f9;
+        text-align: center;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="photoInfo"></div>
+
+    <script>
+      // Get the ID from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
+
+      console.log(id);
+
+      const container = document.getElementById("photoInfo");
+      container.innerHTML = "";
+
+      const photoDiv = document.createElement("div");
+      photoDiv.className = "photo";
+
+      const removeDiv = document.createElement("button");
+      removeDiv.textContent = "Delete";
+
+      const downloadDiv = document.createElement("button");
+      downloadDiv.textContent = "Download";
+
+      function onDownloadClick() {
+        window.location.href = `/download/${id}`;
+      }
+
+      async function onDeleteClick() {
+        await fetch(`http://localhost:8080/photoz/${id}`, {
+          method: "DELETE",
+        })
+          .then((result) => result.text())
+          .then((text) => {
+            console.log(text);
+            setTimeout(function () {
+              window.location.href = "/";
+            }, 1000);
+          });
+      }
+
+      // Set the onclick event handler
+      removeDiv.onclick = onDeleteClick;
+      downloadDiv.onclick = onDownloadClick;
+
+      container.appendChild(removeDiv);
+      container.appendChild(downloadDiv);
+
+      // Fetch the photo data using the new endpoint
+      fetch(`/photoz/${id}`)
+        .then((response) => response.text())
+        .then((dataUrl) => {
+          // Add photo details
+          console.log("hi");
+          photoDiv.innerHTML = `<img src="${dataUrl}"  /> `;
+          container.appendChild(photoDiv);
+        })
+        .catch((error) => {
+          console.error("Error fetching photo:", error);
+          photoDiv.innerHTML = "<p>Error loading photo.</p>";
+          container.appendChild(photoDiv);
+        });
+    </script>
+  </body>
+</html>
