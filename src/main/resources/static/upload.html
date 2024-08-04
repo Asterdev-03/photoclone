@@ -19,7 +19,12 @@
           body: formData,
         })
           .then((result) => result.text())
-          .then((text) => alert(text));
+          .then((text) => {
+            alert(text);
+            setTimeout(function () {
+              window.location.href = "/";
+            }, 1000);
+          });
       }
     </script>
   </body>
