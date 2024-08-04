@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Gallery</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        box-sizing: border-box;
+      }
+      h1 {
+        text-align: center;
+        margin: 20px 0;
+      }
+      #photo-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2rem;
+        padding: 0 10px;
+      }
+      .photo {
+        border: 3px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: #f9f9f9;
+        text-align: center;
+      }
+      img {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .photo h2 {
+        margin: 0;
+        padding: 10px;
+        font-size: 14px;
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Photo Gallery</h1>
+    <br />
+    <div id="photo-container"></div>
+    <br />
+    <button type="submit" onclick="upload()">Upload</button>
+
+    <script>
+      // Redirects to upload image form
+      function upload() {
+        window.location.href = "/upload.html";
+      }
+
+      // Fetch photo metadata from the /photoz endpoint
+      fetch("/photoz")
+        .then((response) => response.json())
+        .then((data) => {
+          const container = document.getElementById("photo-container");
+          container.innerHTML = "";
+
+          if (Array.isArray(data)) {
+            data.forEach((photo) => {
+              // Create a new div for each photo
+              const photoDiv = document.createElement("div");
+              photoDiv.className = "photo";
+
+              // Construct the photo detail URL
+              const photoUrl = `/photo-detail/${photo.id}`;
+
+              // Fetch the photo data using the new endpoint
+              fetch(`/photoz/${photo.id}`)
+                .then((response) => response.text())
+                .then((dataUrl) => {
+                  // Add photo details
+                  photoDiv.innerHTML = `  <a href="/photoInfo.html?id=${photo.id}">
+                                        <img src="${dataUrl}" alt="${photo.filename}" />
+                                        <h2>${photo.filename}</h2>
+                                    </a>
+                                `;
+                  container.appendChild(photoDiv);
+                })
+                .catch((error) => {
+                  console.error("Error fetching photo:", error);
+                  photoDiv.innerHTML = "<p>Error loading photo.</p>";
+                  container.appendChild(photoDiv);
+                });
+            });
+          } else {
+            container.innerHTML = "<p>No photos found.</p>";
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching photos:", error);
+          document.getElementById("photo-container").innerHTML =
+            "<p>Error loading photos.</p>";
+        });
+    </script>
+  </body>
+</html>
